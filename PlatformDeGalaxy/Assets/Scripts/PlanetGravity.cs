@@ -3,36 +3,33 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 
-namespace Scripts
+
+
+public class PlanetGravity : MonoBehaviour
 {
-    public class PlanetGravity : MonoBehaviour
+    public float PullRadius;
+    public float GravitationalPull;
+    public float MinRadius;
+    public float DistanceMultiplier;
+
+    public LayerMask LayersToPull;
+
+    void FixedUpdate()
     {
-        public float PullRadius;
-        public float GravitationalPull;
-        public float MinRadius;
-        public float DistanceMultiplier;
+        Collider2D collider = Physics2D.OverlapCircle(transform.position, PullRadius, LayersToPull);
 
-        public LayerMask LayersToPull;
+        Rigidbody2D rb = collider.GetComponent<Rigidbody2D>();
 
-        void FixedUpdate()
-        {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, PullRadius, LayersToPull);
+        if (rb = null) return;
 
-            foreach (var collider in colliders)
-            {
-                Rigidbody2D rb;// = collider.GetComponent<Rigidbody2D>();
+        Vector2 direction = transform.position - collider.transform.position;
 
-                if (rb = null) continue;
+        if (direction.magnitude > MinRadius) return;
 
-                Vector2 direction = transform.position - collider.transform.position;
+        float distance = direction.sqrMagnitude * DistanceMultiplier + 1;
 
-                if (direction.magnitude < MinRadius) continue;
-
-                float distance = direction.sqrMagnitude * DistanceMultiplier + 1;
-
-                rb.AddForce(direction.normalized * (GravitationalPull / distance) * rb.mass * Time.fixedDeltaTime);
-            }
-
-        }
+        rb.AddForce(direction.normalized * (GravitationalPull / distance) * rb.mass * Time.fixedDeltaTime);
+       
     }
 }
+
