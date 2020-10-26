@@ -11,25 +11,27 @@ public class PlanetGravity : MonoBehaviour
     public float GravitationalPull;
     public float MinRadius;
     public float DistanceMultiplier;
-
+    
     public LayerMask LayersToPull;
-
+    
     void FixedUpdate()
     {
-        Collider2D collider = Physics2D.OverlapCircle(transform.position, PullRadius, LayersToPull);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, PullRadius, LayersToPull);
 
-        Rigidbody2D rb = collider.GetComponent<Rigidbody2D>();
+        for (var i = 0; i < colliders.Length; i++)
+        {
+            Rigidbody2D rb = colliders[i].GetComponent<Rigidbody2D>();
 
-        if (rb = null) return;
+            if (rb == null) continue;
+            
+            Vector2 direction = transform.position - colliders[i].transform.position;
 
-        Vector2 direction = transform.position - collider.transform.position;
+            if (direction.magnitude < MinRadius) continue;
 
-        if (direction.magnitude > MinRadius) return;
+            float distance = direction.sqrMagnitude * DistanceMultiplier + 1;
 
-        float distance = direction.sqrMagnitude * DistanceMultiplier + 1;
-
-        rb.AddForce(direction.normalized * (GravitationalPull / distance) * rb.mass * Time.fixedDeltaTime);
-       
+            rb.AddForce(direction.normalized * (GravitationalPull / distance) * rb.mass * Time.fixedDeltaTime);
+        }
     }
 }
 
