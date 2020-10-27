@@ -298,6 +298,7 @@ GameObject:
   - component: {fileID: 135128879}
   - component: {fileID: 135128878}
   - component: {fileID: 135128881}
+  - component: {fileID: 135128882}
   m_Layer: 0
   m_Name: BeachBall
   m_TagString: Untagged
@@ -320,7 +321,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -406,6 +407,23 @@ CircleCollider2D:
   m_Offset: {x: 0.0069379807, y: -0.01999998}
   serializedVersion: 2
   m_Radius: 0.46019173
+--- !u!114 &135128882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 135128877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db47c8bcd124b1d42b0089ebd3c6989a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xAcceleration: 100
+  ScanRadius: 10
+  LayerToCheck:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -613,7 +631,7 @@ GameObject:
   - component: {fileID: 1046442145}
   - component: {fileID: 1046442143}
   - component: {fileID: 1046442142}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SmallPlanet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
