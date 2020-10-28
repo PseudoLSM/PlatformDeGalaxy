@@ -4,6 +4,18 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static Vector2 Rotate(Vector2 v, float degrees) // Method for rotating Vector2D's
+    {
+        float radians = degrees * Mathf.Deg2Rad;
+        float sin = Mathf.Sin(radians);
+        float cos = Mathf.Cos(radians);
+
+        float tx = v.x;
+        float ty = v.y;
+
+        return new Vector2(cos * tx - sin * ty, sin * tx + cos * ty);
+    }
+
     public float xAcceleration;
     public float ScanRadius;
 
@@ -12,52 +24,38 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rb;
     Collider2D cldr;
 
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         cldr = GetComponent<Collider2D>();
     }
 
-    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
     void FixedUpdate()
     {
-        if (Input.GetAxis("Horizontal") != 0) // Doesnt get past here with FixedUpdate, no fucking clue why.
+        if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
         {
-            Debug.Log(Mathf.Sign(Input.GetAxis("Horizontal"))); // Checker
+            Collider2D[] Planets = Physics2D.OverlapCircleAll(transform.position, ScanRadius, LayerToCheck); // Finds planets withing range ```ScanRadius```
 
-            Collider2D[] Planets = Physics2D.OverlapCircleAll(transform.position, ScanRadius, LayerToCheck);
-
-            for (var i = 0; i < Planets.Length; i++)
+            for (var i = 0; i < Planets.Length; i++) // Checks for the Planet you are on
             {
-                if (Planets[i] == null) continue;
-
-                Debug.Log(Mathf.Sign(Input.GetAxis("Horizontal"))); //Checker
-
-                if (Mathf.Abs(Planets[0].Distance(cldr).distance) <= 0) // Doesnt get past here with Update, I dont know why yet.
+                if (Mathf.Abs(Planets[i].Distance(cldr).distance) <= 0.1) // Chooses the planet that you are on
                 {
-                    Debug.Log(Mathf.Sign(Input.GetAxis("Horizontal"))); // Checker
+                    Vector2 direction = transform.position - Planets[i].transform.position; // Creates vector in planet's direction
 
-                    Vector2 direction = transform.position - Planets[i].transform.position;
+                    Vector2 fixedDirection = Rotate(direction, 270f); // Utilizes earlier method to rotate the vector 270 degrees to get everything aligned
 
-                    rb.AddForce(direction.normalized * Mathf.Sign(Input.GetAxis("Horizontal")) * xAcceleration * Time.deltaTime);
+                    rb.AddForce(fixedDirection.normalized * Mathf.Sign(Input.GetAxis("Horizontal")) * xAcceleration * Time.deltaTime); // Adds the force to accelerate the player character
                 }
                 else
                 {
                     continue;
                 }
             }
-            /* not needed
-            
-            if (Mathf.Abs(Planets[0].Distance(cldr).distance) >= Mathf.Abs(Planets[1].Distance(cldr).distance))
-            {
-                //Check Whichevers Planets Gravity is the strongest and use that planed as the basepoint from which you are going to move left and right on. Or, you could just find how far the edge of the collider is from the character.
-            }
-            else if (Mathf.Abs(Planets[0].Distance(cldr).distance) < Mathf.Abs(Planets[1].Distance(cldr).distance))
-            {
-
-            }
-            */
         }
     }
 }

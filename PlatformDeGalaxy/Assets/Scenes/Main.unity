@@ -404,7 +404,7 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0069379807, y: -0.01999998}
+  m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.46019173
 --- !u!114 &135128882
@@ -419,7 +419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db47c8bcd124b1d42b0089ebd3c6989a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xAcceleration: 100
+  xAcceleration: 500
   ScanRadius: 10
   LayerToCheck:
     serializedVersion: 2
@@ -684,7 +684,7 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.00019327673, y: 0}
+  m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.36265346
 --- !u!212 &1046442145
