@@ -22,6 +22,8 @@ public class PlanetGravity : MonoBehaviour
         {
             Rigidbody2D rb = colliders[i].GetComponent<Rigidbody2D>();
 
+            Rigidbody2D planet = GetComponent<Rigidbody2D>();
+
             if (rb == null) continue;
             
             Vector2 direction = transform.position - colliders[i].transform.position;
@@ -30,7 +32,7 @@ public class PlanetGravity : MonoBehaviour
 
             float distance = direction.sqrMagnitude * DistanceMultiplier + 1;
 
-            rb.AddForce(direction.normalized * (GravitationalPull / distance) * rb.mass * Time.fixedDeltaTime);
+            rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass) / distance) * rb.mass * Time.fixedDeltaTime);
         }
     }
 }
