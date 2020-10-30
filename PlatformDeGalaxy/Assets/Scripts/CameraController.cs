@@ -8,7 +8,7 @@ public class CameraController : MonoBehaviour
 
     protected Vector3 PositionOffset = new Vector3(0, 0, -1); // A offset for the camera if we ever need it
 
-    public bool LookAtTarget = true; // Change if the camera is following or not (this might be useful for the smooth planet switching
+    [HideInInspector] public bool LookAtTarget = true; // Change if the camera is following or not (this might be useful for the smooth planet switching
 
     protected Transform myTransform;
 

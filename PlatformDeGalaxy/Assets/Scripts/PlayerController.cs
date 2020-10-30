@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public static Vector2 Rotate(Vector2 v, float degrees) // Method for rotating Vector2D's
+    public static Vector2 RotateVector(Vector2 v, float degrees) // Method for rotating Vector2D's           Do Not Change
     {
         float radians = degrees * Mathf.Deg2Rad;
         float sin = Mathf.Sin(radians);
@@ -16,13 +16,13 @@ public class PlayerController : MonoBehaviour
         return new Vector2(cos * tx - sin * ty, sin * tx + cos * ty);
     }
 
-    public float xAcceleration;
-    public float ScanRadius;
+    [SerializeField] protected float xAcceleration;
+    [SerializeField] protected float ScanRadius;
 
-    public LayerMask LayerToCheck;
+    [SerializeField] protected LayerMask LayerToCheck;
 
-    Rigidbody2D rb;
-    Collider2D cldr;
+    protected Rigidbody2D rb;
+    protected Collider2D cldr;
 
     void Start()
     {
@@ -41,13 +41,21 @@ public class PlayerController : MonoBehaviour
         {
             Collider2D[] Planets = Physics2D.OverlapCircleAll(transform.position, ScanRadius, LayerToCheck); // Finds planets withing range ```ScanRadius```
 
-            for (var i = 0; i < Planets.Length; i++) // Checks for the Planet you are on
+            float[] PlanetGravities = new float[Planets.Length]; // Creates array that will be filled with the magnitudes of the gravities from planets within the scan radius
+
+            for (var i = 0; i < Planets.Length; i++)
+            {
+                PlanetGravities[i] = Planets[i].GetComponent<PlanetGravity>().ForceOfGravity.magnitude; // Populates the empty array with the needed data
+                Debug.Log(PlanetGravities[i]); // Checker
+            }
+
+            for (var i = 0; i < PlanetGravities.Length; i++) // Checks for the Planet you are on
             {
                 if (Mathf.Abs(Planets[i].Distance(cldr).distance) <= 0.1) // Chooses the planet that you are on
                 {
                     Vector2 direction = transform.position - Planets[i].transform.position; // Creates vector in planet's direction
 
-                    Vector2 fixedDirection = Rotate(direction, 270f); // Utilizes earlier method to rotate the vector 270 degrees to get everything aligned
+                    Vector2 fixedDirection = RotateVector(direction, 270f); // Utilizes earlier method to rotate the vector 270 degrees to get everything aligned
 
                     rb.AddForce(fixedDirection.normalized * Mathf.Sign(Input.GetAxis("Horizontal")) * xAcceleration * Time.deltaTime); // Adds the force to accelerate the player character
                 }

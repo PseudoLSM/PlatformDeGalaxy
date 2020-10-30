@@ -7,12 +7,16 @@ using UnityEngine;
 
 public class PlanetGravity : MonoBehaviour
 {
-    public float PullRadius;
-    public float GravitationalPull;
-    public float MinRadius;
-    public float DistanceMultiplier;
+    [SerializeField] protected float PullRadius;
+    [SerializeField] protected float GravitationalPull;
+    [SerializeField] protected float MinRadius;
+    [SerializeField] protected float DistanceMultiplier;
+
+    [SerializeField] protected GameObject PlayerObject;
+
+    [HideInInspector] public Vector2 ForceOfGravity = new Vector2(0, 0);
     
-    public LayerMask LayersToPull;
+    [SerializeField] protected LayerMask LayersToPull;
     
     void FixedUpdate()
     {
@@ -32,6 +36,11 @@ public class PlanetGravity : MonoBehaviour
 
             float distance = direction.sqrMagnitude * DistanceMultiplier + 1;
 
+            if (colliders[i].gameObject == PlayerObject)
+            {
+                ForceOfGravity = direction.normalized * ((GravitationalPull * planet.mass) / distance) * rb.mass * Time.fixedDeltaTime;
+            }
+            
             rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass) / distance) * rb.mass * Time.fixedDeltaTime);
         }
     }
