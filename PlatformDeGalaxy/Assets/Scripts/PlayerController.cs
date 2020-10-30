@@ -21,6 +21,8 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] protected LayerMask LayerToCheck;
 
+    public GameObject StrongestPlanet;
+
     protected Rigidbody2D rb;
     protected Collider2D cldr;
 
@@ -37,21 +39,38 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
+        Collider2D[] Planets = Physics2D.OverlapCircleAll(transform.position, ScanRadius, LayerToCheck); // Finds planets withing range ```ScanRadius```
+
+        float[] PlanetGravities = new float[Planets.Length]; // Creates array that will be filled with the magnitudes of the gravities from planets within the scan radius
+
+        if (Planets.Length != 0)
         {
-            Collider2D[] Planets = Physics2D.OverlapCircleAll(transform.position, ScanRadius, LayerToCheck); // Finds planets withing range ```ScanRadius```
-
-            float[] PlanetGravities = new float[Planets.Length]; // Creates array that will be filled with the magnitudes of the gravities from planets within the scan radius
-
             for (var i = 0; i < Planets.Length; i++)
             {
                 PlanetGravities[i] = Planets[i].GetComponent<PlanetGravity>().ForceOfGravity.magnitude; // Populates the empty array with the needed data
-                Debug.Log(PlanetGravities[i]); // Checker
             }
+        
+            float Max = PlanetGravities[0];  
+            
+            for (var i = 0; i < PlanetGravities.Length; i++) // Finds the largest gravity magnitude
+            {
+                if (Max < PlanetGravities[i]) Max = PlanetGravities[i] ;
+            }
+        
+            for (var i = 0; i < PlanetGravities.Length; i++) // Assigns the Planet with the strongest gravity acting on the player to the ```StrongestPlanet``` variable
+            {
+                if (Max == PlanetGravities[i])
+                {
+                    StrongestPlanet = Planets[i].gameObject;
+                }
+            }
+        }
 
+        if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
+        {
             for (var i = 0; i < PlanetGravities.Length; i++) // Checks for the Planet you are on
             {
-                if (Mathf.Abs(Planets[i].Distance(cldr).distance) <= 0.1) // Chooses the planet that you are on
+                if (Mathf.Abs(Planets[i].Distance(cldr).distance) <= 0.1) // Chooses the planet that you are on      THIS WILL BE REMOVED
                 {
                     Vector2 direction = transform.position - Planets[i].transform.position; // Creates vector in planet's direction
 
