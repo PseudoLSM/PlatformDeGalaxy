@@ -8,7 +8,7 @@ public class CameraController : MonoBehaviour
 
     protected Vector3 PositionOffset = new Vector3(0, 0, -1); // A offset for the camera if we ever need it
 
-    [HideInInspector] public bool LookAtTarget = true; // Change if the camera is following or not (this might be useful for the smooth planet switching
+    [HideInInspector] public bool FollowTarget = true; // Change if the camera is following or not (this might be useful for the smooth planet switching)
 
     protected Transform myTransform;
 
@@ -19,14 +19,13 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate() // Updates near the end of every frame
     {
-        if (TargetObject)
+        if (TargetObject != null && FollowTarget == true)
         {
             myTransform.position = TargetObject.position + PositionOffset; // Actually moves the camera
+            myTransform.rotation = TargetObject.rotation;
+            //Vector2 LookAtPlanet = transform.position - TargetObject.GetComponent<PlayerController>().StrongestPlanet.GetComponent<Transform>().position;  // Maybe just do this based on where the player is looking.
+            
 
-            if (LookAtTarget) // Dont know why this is here, I don't think we need it.
-            {
-                myTransform.LookAt(TargetObject);
-            }
         }
     }
 }
