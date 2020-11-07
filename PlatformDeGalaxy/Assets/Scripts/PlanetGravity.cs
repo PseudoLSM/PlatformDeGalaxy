@@ -42,7 +42,7 @@ public class PlanetGravity : MonoBehaviour
 
                 if (ForceOfGravity == PlayerObject.GetComponent<PlayerController>().StrongestPlanet.GetComponent<PlanetGravity>().ForceOfGravity)
                 {
-                    rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass) / distance) * rb.mass * Time.fixedDeltaTime);
+                    rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass) / distance) * Time.fixedDeltaTime);
                 }
             } 
             else

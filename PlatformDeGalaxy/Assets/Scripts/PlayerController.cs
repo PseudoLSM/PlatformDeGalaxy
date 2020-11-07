@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     }
 
     [SerializeField] protected float xAcceleration;
+    [SerializeField] protected float jumpAcceleration;
     [SerializeField] protected float ScanRadius;
 
     [SerializeField] protected LayerMask LayerToCheck;
@@ -42,14 +43,24 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        //Player.transform.LookAt(Player.GetComponent<PlayerController>().StrongestPlanet.transform.position);
+        // Fix player rotation to planet
         targetPos = StrongestPlanet.transform.position;
         thisPos = transform.position;
         targetPos.x = targetPos.x - thisPos.x;
         targetPos.y = targetPos.y - thisPos.y;
         angle = Mathf.Atan2(targetPos.y, targetPos.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + offset));
-        //Player.transform.LookAt(StrongestPlanet.GetComponent<Transform>().position);
+
+        // Jumping
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (Mathf.Abs(StrongestPlanet.GetComponent<Collider2D>().Distance(cldr).distance) <= 0.01)
+            {
+                Vector2 jumpDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position;
+                Vector2 fixedJumpDirection = RotateVector(jumpDirection, 180f);
+                rb.AddForce(jumpDirection * Mathf.Sign(fixedJumpDirection.magnitude) * jumpAcceleration);
+            }
+        }
     }
 
     void FixedUpdate()
@@ -83,13 +94,13 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
         {
-            if (Mathf.Abs(StrongestPlanet.GetComponent<Collider2D>().Distance(cldr).distance) <= 0.1) // Chooses the planet that you are on      THIS WILL BE REMOVED
+            if (Mathf.Abs(StrongestPlanet.GetComponent<Collider2D>().Distance(cldr).distance) <= 0.01) // Chooses the planet that you are on      THIS WILL BE REMOVED
             {
-                Vector2 direction = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position; // Creates vector in planet's direction
+                Vector2 moveDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position; // Creates vector in planet's direction
 
-                Vector2 fixedDirection = RotateVector(direction, 270f); // Utilizes earlier method to rotate the vector 270 degrees to get everything aligned
+                Vector2 fixedMoveDirection = RotateVector(moveDirection, 270f); // Utilizes earlier method to rotate the vector 270 degrees to get everything aligned
 
-                rb.AddForce(fixedDirection.normalized * Mathf.Sign(Input.GetAxis("Horizontal")) * xAcceleration * Time.deltaTime); // Adds the force to accelerate the player character
+                rb.AddForce(fixedMoveDirection.normalized * Mathf.Sign(Input.GetAxis("Horizontal")) * xAcceleration * Time.deltaTime); // Adds the force to accelerate the player character
             }
         }
     }
