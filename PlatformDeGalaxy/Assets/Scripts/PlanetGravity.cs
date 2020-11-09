@@ -47,7 +47,7 @@ public class PlanetGravity : MonoBehaviour
             } 
             else
             {
-                rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass) / distance) * rb.mass * Time.fixedDeltaTime);
+                rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass) / distance) * Time.fixedDeltaTime);
             }
         }
     }

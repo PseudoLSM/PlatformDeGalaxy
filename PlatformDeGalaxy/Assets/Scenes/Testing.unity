@@ -686,8 +686,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db733741f2475314198c9d7c5033d2d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PullRadius: 60
-  GravitationalPull: 10000
+  PullRadius: 20
+  GravitationalPull: 6000
   MinRadius: 1
   DistanceMultiplier: 8
   PlayerObject: {fileID: 135128877}
