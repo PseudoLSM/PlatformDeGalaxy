@@ -58,7 +58,7 @@ public class PlayerController : MonoBehaviour
             {
                 Vector2 jumpDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position;
                 Vector2 fixedJumpDirection = RotateVector(jumpDirection, 180f);
-                rb.AddForce(jumpDirection * Mathf.Sign(fixedJumpDirection.magnitude) * jumpAcceleration);
+                rb.AddForce(jumpDirection.normalized * Mathf.Sign(fixedJumpDirection.magnitude) * jumpAcceleration);
             }
         }
     }
