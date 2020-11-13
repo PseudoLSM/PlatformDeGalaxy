@@ -19,16 +19,15 @@ public class PlayerController : MonoBehaviour
     // Movement
     [SerializeField] protected float xAcceleration;
     [SerializeField] protected float jumpAcceleration;
+    [SerializeField] protected float boostAcceleration;
 
     // Jumping
-    [SerializeField] protected Transform jumpCheckPoint;
-    [SerializeField] protected LayerMask jumpCheckLayer;
-    [SerializeField] protected float jumpCheckRadius;
-    protected int jumpTokens;
-    protected int jumpTokensMax;
-    protected bool jumpTokensResetDoor1;
-    protected bool jumpTokensResetDoor2;
-    protected bool jumpTokensResetDoor3;
+    [SerializeField] protected Transform boostCheckPoint;
+    [SerializeField] protected LayerMask boostCheckLayer;
+    [SerializeField] protected float boostCheckRadius;
+    protected int boostTokens;
+    protected int boostTokensMax;
+
     [HideInInspector] public bool isTouchingGround;
 
     // Planet Checking
@@ -50,54 +49,54 @@ public class PlayerController : MonoBehaviour
         cldr = GetComponent<Collider2D>();
         Player = gameObject;
         offset = 90f;
-        jumpTokens = 0;
-        jumpTokensMax = 1;
-        jumpTokensResetDoor1 = true;
-        jumpTokensResetDoor2 = true;
-        jumpTokensResetDoor3 = true;
+        boostTokens = 0;
+        boostTokensMax = 1;
     }
 
     void Update()
     {
         // Fix player rotation to planet
-        targetPos = StrongestPlanet.transform.position;
-        thisPos = transform.position;
-        targetPos.x -= thisPos.x;
-        targetPos.y -= thisPos.y;
-        angle = Mathf.Atan2(targetPos.y, targetPos.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + offset));
-
-
-        isTouchingGround = Physics2D.OverlapCircle(jumpCheckPoint.position, jumpCheckRadius, jumpCheckLayer); // Checks if the player is on top of an object
-
-        if (jumpTokens < jumpTokensMax && isTouchingGround && jumpTokensResetDoor2 == true) // Refreshes jump tokens when on an/the object/ground
+        if (StrongestPlanet != null)
         {
-            jumpTokens = jumpTokensMax;
-            jumpTokensResetDoor1 = false;
-            jumpTokensResetDoor2 = false;
-            jumpTokensResetDoor3 = false;
-        }
+            targetPos = StrongestPlanet.transform.position;
+            thisPos = transform.position;
 
-        if (jumpTokensResetDoor2 == true)
-        {
-            jumpTokensResetDoor3 = true;
-        }
+            targetPos.x -= thisPos.x;
+            targetPos.y -= thisPos.y;
 
-        if (jumpTokensResetDoor1 == true)
-        {
-            jumpTokensResetDoor2 = true;
+            angle = Mathf.Atan2(targetPos.y, targetPos.x) * Mathf.Rad2Deg;
+
+            transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + offset));
         }
 
         // Jumping
-        if (Input.GetKeyDown(KeyCode.Space) && jumpTokens > 0) // Checks for Jump input 
+        isTouchingGround = Physics2D.OverlapCircle(boostCheckPoint.position, boostCheckRadius, boostCheckLayer); // Checks if the player is on top of an object
+
+        // Double jump tokens
+        if (boostTokens < boostTokensMax && isTouchingGround) // Refreshes jump tokens when on an/the object/ground
         {
-            jumpTokens--;
-            jumpTokensResetDoor1 = true;
+            boostTokens = boostTokensMax;
+        }
+
+        // Jump off of ground
+        if (Input.GetKeyDown(KeyCode.Space) && isTouchingGround) // Checks for Jump input 
+        {
             Vector2 jumpDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position;
             Vector2 fixedJumpDirection = RotateVector(jumpDirection, 180f);
+
             rb.AddForce(jumpDirection.normalized * Mathf.Sign(fixedJumpDirection.magnitude) * jumpAcceleration);
         }
-        Debug.Log(jumpTokens);
+
+        // Boost
+        if (Input.GetKeyDown(KeyCode.Space) && boostTokens > 0 && !isTouchingGround) // Checks for Jump input 
+        {
+            boostTokens--;
+
+            Vector2 jumpDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position;
+            Vector2 fixedJumpDirection = RotateVector(jumpDirection, 180f);
+
+            rb.AddForce(jumpDirection.normalized * Mathf.Sign(fixedJumpDirection.magnitude) * boostAcceleration);
+        }
     }
 
     void FixedUpdate()
@@ -128,13 +127,16 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            StrongestPlanet = null;
+        }
 
         if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
         {
-            if (Mathf.Abs(StrongestPlanet.GetComponent<Collider2D>().Distance(cldr).distance) <= 0.05) // Chooses the planet that you are on      THIS WILL BE REMOVED
+            if (isTouchingGround) // Chooses the planet that you are on      THIS WILL BE REMOVED
             {
                 Vector2 moveDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position; // Creates vector in planet's direction
-
                 Vector2 fixedMoveDirection = RotateVector(moveDirection, 270f); // Utilizes earlier method to rotate the vector 270 degrees to get everything aligned
 
                 rb.AddForce(fixedMoveDirection.normalized * Mathf.Sign(Input.GetAxis("Horizontal")) * xAcceleration * Time.deltaTime); // Adds the force to accelerate the player character
