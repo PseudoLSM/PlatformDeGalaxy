@@ -16,19 +16,30 @@ public class PlayerController : MonoBehaviour
 
         return new Vector2(cos * tx - sin * ty, sin * tx + cos * ty);
     }
-
+    // Movement
     [SerializeField] protected float xAcceleration;
     [SerializeField] protected float jumpAcceleration;
+
+    // Jumping
+    [SerializeField] protected Transform jumpCheckPoint;
+    [SerializeField] protected LayerMask jumpCheckLayer;
+    [SerializeField] protected float jumpCheckRadius;
+    protected int jumpTokens;
+    protected int jumpTokensMax;
+    protected bool jumpTokensResetDoor1;
+    protected bool jumpTokensResetDoor2;
+    protected bool jumpTokensResetDoor3;
+    [HideInInspector] public bool isTouchingGround;
+
+    // Planet Checking
+    [SerializeField] protected LayerMask PlanetLayer;
     [SerializeField] protected float ScanRadius;
-
-    [SerializeField] protected LayerMask LayerToCheck;
-
     public GameObject StrongestPlanet;
 
     protected Rigidbody2D rb;
     protected Collider2D cldr;
     protected GameObject Player;
-    public float offset;
+    protected float offset;
     protected Vector3 targetPos;
     protected Vector3 thisPos;
     protected float angle;
@@ -38,7 +49,12 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         cldr = GetComponent<Collider2D>();
         Player = gameObject;
-        offset = 90;
+        offset = 90f;
+        jumpTokens = 0;
+        jumpTokensMax = 1;
+        jumpTokensResetDoor1 = true;
+        jumpTokensResetDoor2 = true;
+        jumpTokensResetDoor3 = true;
     }
 
     void Update()
@@ -46,26 +62,47 @@ public class PlayerController : MonoBehaviour
         // Fix player rotation to planet
         targetPos = StrongestPlanet.transform.position;
         thisPos = transform.position;
-        targetPos.x = targetPos.x - thisPos.x;
-        targetPos.y = targetPos.y - thisPos.y;
+        targetPos.x -= thisPos.x;
+        targetPos.y -= thisPos.y;
         angle = Mathf.Atan2(targetPos.y, targetPos.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + offset));
 
-        // Jumping
-        if (Input.GetKeyDown(KeyCode.Space))
+
+        isTouchingGround = Physics2D.OverlapCircle(jumpCheckPoint.position, jumpCheckRadius, jumpCheckLayer); // Checks if the player is on top of an object
+
+        if (jumpTokens < jumpTokensMax && isTouchingGround && jumpTokensResetDoor2 == true) // Refreshes jump tokens when on an/the object/ground
         {
-            if (Mathf.Abs(StrongestPlanet.GetComponent<Collider2D>().Distance(cldr).distance) <= 0.01)
-            {
-                Vector2 jumpDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position;
-                Vector2 fixedJumpDirection = RotateVector(jumpDirection, 180f);
-                rb.AddForce(jumpDirection.normalized * Mathf.Sign(fixedJumpDirection.magnitude) * jumpAcceleration);
-            }
+            jumpTokens = jumpTokensMax;
+            jumpTokensResetDoor1 = false;
+            jumpTokensResetDoor2 = false;
+            jumpTokensResetDoor3 = false;
         }
+
+        if (jumpTokensResetDoor2 == true)
+        {
+            jumpTokensResetDoor3 = true;
+        }
+
+        if (jumpTokensResetDoor1 == true)
+        {
+            jumpTokensResetDoor2 = true;
+        }
+
+        // Jumping
+        if (Input.GetKeyDown(KeyCode.Space) && jumpTokens > 0) // Checks for Jump input 
+        {
+            jumpTokens--;
+            jumpTokensResetDoor1 = true;
+            Vector2 jumpDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position;
+            Vector2 fixedJumpDirection = RotateVector(jumpDirection, 180f);
+            rb.AddForce(jumpDirection.normalized * Mathf.Sign(fixedJumpDirection.magnitude) * jumpAcceleration);
+        }
+        Debug.Log(jumpTokens);
     }
 
     void FixedUpdate()
     {
-        Collider2D[] Planets = Physics2D.OverlapCircleAll(transform.position, ScanRadius, LayerToCheck); // Finds planets withing range ```ScanRadius```
+        Collider2D[] Planets = Physics2D.OverlapCircleAll(transform.position, ScanRadius, PlanetLayer); // Finds planets withing range ```ScanRadius```
 
         float[] PlanetGravities = new float[Planets.Length]; // Creates array that will be filled with the magnitudes of the gravities from planets within the scan radius
 
@@ -94,7 +131,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
         {
-            if (Mathf.Abs(StrongestPlanet.GetComponent<Collider2D>().Distance(cldr).distance) <= 0.01) // Chooses the planet that you are on      THIS WILL BE REMOVED
+            if (Mathf.Abs(StrongestPlanet.GetComponent<Collider2D>().Distance(cldr).distance) <= 0.05) // Chooses the planet that you are on      THIS WILL BE REMOVED
             {
                 Vector2 moveDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position; // Creates vector in planet's direction
 
