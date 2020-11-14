@@ -56,18 +56,15 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // Fix player rotation to planet
-        if (StrongestPlanet != null)
-        {
-            targetPos = StrongestPlanet.transform.position;
-            thisPos = transform.position;
+        targetPos = StrongestPlanet.transform.position;
+        thisPos = transform.position;
 
-            targetPos.x -= thisPos.x;
-            targetPos.y -= thisPos.y;
+        targetPos.x -= thisPos.x;
+        targetPos.y -= thisPos.y;
 
-            angle = Mathf.Atan2(targetPos.y, targetPos.x) * Mathf.Rad2Deg;
+        angle = Mathf.Atan2(targetPos.y, targetPos.x) * Mathf.Rad2Deg;
 
-            transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + offset));
-        }
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + offset));
 
         // Jumping
         isTouchingGround = Physics2D.OverlapCircle(boostCheckPoint.position, boostCheckRadius, boostCheckLayer); // Checks if the player is on top of an object
@@ -127,11 +124,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
-        else
-        {
-            StrongestPlanet = null;
-        }
-
+        
         if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
         {
             if (isTouchingGround) // Chooses the planet that you are on      THIS WILL BE REMOVED

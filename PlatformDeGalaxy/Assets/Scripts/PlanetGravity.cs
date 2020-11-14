@@ -15,6 +15,7 @@ public class PlanetGravity : MonoBehaviour
     [SerializeField] protected GameObject PlayerObject;
 
     [HideInInspector] public Vector2 ForceOfGravity = new Vector2(0, 0);
+    protected bool containsPlayer;
     
     [SerializeField] protected LayerMask LayersToPull;
     
@@ -24,22 +25,37 @@ public class PlanetGravity : MonoBehaviour
 
         for (var i = 0; i < colliders.Length; i++)
         {
-            Rigidbody2D rb = colliders[i].GetComponent<Rigidbody2D>();
+            if (colliders[i] == PlayerObject)
+            {
+                containsPlayer = true;
+                break;
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        if (containsPlayer == false) { ForceOfGravity = new Vector2(0, 0); }
+
+        for (var j = 0; j < colliders.Length; j++)
+        {
+            Rigidbody2D rb = colliders[j].GetComponent<Rigidbody2D>();
 
             Rigidbody2D planet = GetComponent<Rigidbody2D>();
 
             if (rb == null) continue;
             
-            Vector2 direction = transform.position - colliders[i].transform.position;
+            Vector2 direction = transform.position - colliders[j].transform.position;
 
             if (direction.magnitude < MinRadius) continue;
 
             float distance = direction.sqrMagnitude * DistanceMultiplier + 1;
 
-            if (colliders[i].gameObject == PlayerObject)
+            if (colliders[j].gameObject == PlayerObject)
             {
                 ForceOfGravity = direction.normalized * ((GravitationalPull * planet.mass) / distance) * rb.mass * Time.fixedDeltaTime;
-
+                
                 if (ForceOfGravity == PlayerObject.GetComponent<PlayerController>().StrongestPlanet.GetComponent<PlanetGravity>().ForceOfGravity)
                 {
                     rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass * PlayerObject.GetComponent<Rigidbody2D>().mass) / distance) * Time.fixedDeltaTime);
@@ -47,7 +63,7 @@ public class PlanetGravity : MonoBehaviour
             } 
             else
             {
-                rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass * colliders[i].gameObject.GetComponent<Rigidbody2D>().mass) / distance) * Time.fixedDeltaTime);
+                rb.AddForce(direction.normalized * ((GravitationalPull * planet.mass * colliders[j].gameObject.GetComponent<Rigidbody2D>().mass) / distance) * Time.fixedDeltaTime);
             }
         }
     }
