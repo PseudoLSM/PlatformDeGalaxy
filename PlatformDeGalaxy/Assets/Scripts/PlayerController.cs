@@ -20,6 +20,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] protected float xAcceleration;
     [SerializeField] protected float jumpAcceleration;
     [SerializeField] protected float boostAcceleration;
+    [SerializeField] protected float artificialFriction;
+
+    // Animation
+    protected Animator playerAnimation;
+    protected float playerXScale;
 
     // Jumping
     [SerializeField] protected Transform boostCheckPoint;
@@ -51,6 +56,8 @@ public class PlayerController : MonoBehaviour
         offset = 90f;
         boostTokens = 0;
         boostTokensMax = 1;
+        playerAnimation = GetComponent<Animator>();
+        playerXScale = transform.localScale.x;
     }
 
     void Update()
@@ -94,6 +101,18 @@ public class PlayerController : MonoBehaviour
 
             rb.AddForce(jumpDirection.normalized * Mathf.Sign(fixedJumpDirection.magnitude) * boostAcceleration);
         }
+
+        // Animation
+        playerAnimation.SetFloat("Speed", rb.velocity.magnitude);
+        playerAnimation.SetBool("OnGround", isTouchingGround);
+        if (Input.GetAxis("Horizontal") > 0)
+        {
+            transform.localScale = new Vector2(-playerXScale, transform.localScale.y);
+        }
+        else if (Input.GetAxis("Horizontal") < 0)
+        {
+            transform.localScale = new Vector2(playerXScale, transform.localScale.y);
+        }
     }
 
     void FixedUpdate()
@@ -127,12 +146,38 @@ public class PlayerController : MonoBehaviour
         
         if (Input.GetAxis("Horizontal") != 0) // Checks for horizontal movement input
         {
-            if (isTouchingGround) // Chooses the planet that you are on      THIS WILL BE REMOVED
+            if (isTouchingGround) // Checks if you are on the ground or an object
             {
                 Vector2 moveDirection = transform.position - StrongestPlanet.GetComponent<Collider2D>().transform.position; // Creates vector in planet's direction
                 Vector2 fixedMoveDirection = RotateVector(moveDirection, 270f); // Utilizes earlier method to rotate the vector 270 degrees to get everything aligned
 
                 rb.AddForce(fixedMoveDirection.normalized * Mathf.Sign(Input.GetAxis("Horizontal")) * xAcceleration * Time.deltaTime); // Adds the force to accelerate the player character
+            }
+        }
+        else
+        {
+            // Artificial Friction
+            if (isTouchingGround) // Checks if you are on the ground or an object
+            {
+                for (int k = 1; k <= 512; k *= 2)
+                {
+                    if (rb.velocity.magnitude < artificialFriction / k)
+                    {
+                        if (k == 512)
+                        {
+                            Debug.Log(rb.velocity.magnitude);
+                            rb.AddForce(-rb.velocity.normalized * artificialFriction / k * 300 * Time.deltaTime);
+                            break;
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        Debug.Log(rb.velocity.magnitude);
+                        rb.AddForce(-rb.velocity.normalized * artificialFriction / k * 300 * Time.deltaTime);
+                        break;
+                    }
+                }
             }
         }
     }
